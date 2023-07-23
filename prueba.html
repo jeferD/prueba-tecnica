@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gráfico de Precio de BTC y ETH</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- Importar Axios -->
+</head>
+<body>
+  <div style="width: 80%; margin: 0 auto;">
+    <canvas id="btcChart"></canvas>
+  </div>
+  <div style="width: 80%; margin: 0 auto;">
+    <canvas id="ethChart"></canvas>
+  </div>
+
+  <script>
+    function graficas(data) {
+      // Aquí colocas el código de las gráficas que ya tienes, omitiré esa parte por simplicidad
+
+      // Creamos objetos vacíos para almacenar los precios de BTC y ETH en el tiempo
+      const btcPrices = {};
+      const ethPrices = {};
+
+      // Procesamos los datos para agrupar los precios de BTC y ETH por fecha_hora_registro
+      data.forEach((row) => {
+        const fechaHora = row.fecha_hora_registro;
+        if (row.nombre_criptomoneda === 'Bitcoin') {
+          btcPrices[fechaHora] = parseFloat(row.precio);
+        } else if (row.nombre_criptomoneda === 'Ethereum') {
+          ethPrices[fechaHora] = parseFloat(row.precio);
+        }
+      });
+
+      // Convertimos los objetos en arreglos para obtener el formato adecuado para los gráficos
+      const labels = Object.keys(btcPrices);
+      const btcPricesArr = Object.values(btcPrices);
+      const ethPricesArr = Object.values(ethPrices);
+
+      // Código para configurar y mostrar el gráfico de Bitcoin usando Chart.js
+      const ctxBtc = document.getElementById('btcChart').getContext('2d');
+      const btcChart = new Chart(ctxBtc, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Precio de BTC',
+              data: btcPricesArr,
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1,
+            },
+          ],
+        },
+      });
+
+      // Código para configurar y mostrar el gráfico de Ethereum usando Chart.js
+      const ctxEth = document.getElementById('ethChart').getContext('2d');
+      const ethChart = new Chart(ctxEth, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Precio de ETH',
+              data: ethPricesArr,
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+            },
+          ],
+        },
+      });
+    }
+
+    // Hacer la solicitud fetch al servidor para obtener los datos
+    fetch('http://127.0.0.1:3000/datos') // Reemplaza con la ruta correcta de tu servidor
+      .then((response) => response.json()) // Convertir la respuesta a JSON
+      .then((data) => {
+        graficas(data); // Llamamos a la función que procesa los datos y genera las gráficas
+      })
+      .catch((error) => {
+        console.log('Error al obtener los datos', error);
+      });
+  </script>
+
+
+</body>
+</html>
